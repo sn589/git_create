@@ -1,0 +1,32 @@
+name: Terraform EC2 and S3
+
+on:
+  push:
+    branches:
+      - main 
+jobs:
+  build:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v1
+      with:
+        terraform_version: 1.5.5  
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Apply
+      run: terraform apply -auto-approve
+
+    - name: Show EC2 instance IP
+      run: aws ec2 describe-instances --filters "Name=tag:Name,Values=example-instance" --query "Reservations[*].Instances[*].PublicIpAddress" --output text
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} // not entering keys since its just a demo project. 
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }} // not entering keys since its just a demo project. 
+
